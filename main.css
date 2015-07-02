@@ -1,0 +1,30 @@
+#chart {
+	background-color: #f8f8f8;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.gridline path,
+.gridline line {
+	fill: none;
+	stroke: #ccc;
+	shape-rendering: crispEdges;
+}
+
+.trendline {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 2px;
+}
+
+.area {
+	opacity: 0.25;
+	fill: #ccc;
+	stroke: #ccc;
+	stroke-width: 1px;
+}

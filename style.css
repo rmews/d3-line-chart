@@ -1,0 +1,36 @@
+/**** CUSTOM STYLESHEET ****/
+
+/**********************
+   	NAVIGATION
+***********************/
+
+nav ul a,
+nav .brand-logo {
+	color: #000;
+}
+
+nav .container {
+	padding: 0 1.0rem;
+  	width: 70%;
+}
+
+/**********************
+   	JUMBOTRON
+***********************/
+
+.parallax-container {
+	min-height: 520px;
+}
+
+.parallax-container .section {
+	width: 100%;
+	margin-top: 6rem;
+ }
+
+
+.parallax-container .container {
+	padding: 0 1.5rem;
+	margin: 0 auto;
+	max-width: 1280px;
+	width: 90%; 
+}

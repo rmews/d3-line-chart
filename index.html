@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+	
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="description" content="Twitch Game Stats">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<title>GamrHive | Twitch Game Stats</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="main.css">
+	<script  type="text/javascript" src="d3.min.js"></script>
+</head>
+
+<body>
+	<!-- NAVIGATION -->
+	<nav class="deep-purple accent-3" role="navigation">
+		<div class="nav-wrapper container">
+			<a class="brand-logo">GamrHive</a>
+		</div>
+	</nav>
+	<div id="chart-area" class="container">
+	</div>
+<script>
+	/** Data Source **/ 
+	var Twitchdata = [
+		{key: "MLB 15 The Show", value: 256, date: "2015/06/01"},
+		{key: "MLB 15 The Show", value: 176, date: "2015/06/02"},
+		{key: "MLB 15 The Show", value: 132, date: "2015/06/03"},
+		{key: "MLB 15 The Show", value: 126, date: "2015/06/04"},
+		{key: "MLB 15 The Show", value: 118, date: "2015/06/05"},
+		{key: "MLB 15 The Show", value: 222, date: "2015/06/06"},
+		{key: "MLB 15 The Show", value: 54, date: "2015/06/07"},
+		{key: "MLB 15 The Show", value: 32, date: "2015/06/08"},
+		{key: "MLB 15 The Show", value: 67, date: "2015/06/09"},
+		{key: "MLB 15 The Show", value: 32, date: "2015/06/10"},
+		{key: "MLB 15 The Show", value: 145, date: "2015/06/11"},
+		{key: "MLB 15 The Show", value: 176, date: "2015/06/12"},
+		{key: "MLB 15 The Show", value: 123, date: "2015/06/13"},
+		{key: "MLB 15 The Show", value: 186, date: "2015/06/14"},
+		{key: "MLB 15 The Show", value: 296, date: "2015/06/15"},
+		{key: "MLB 15 The Show", value: 445, date: "2015/06/16"},
+		{key: "MLB 15 The Show", value: 323, date: "2015/06/17"},
+		{key: "MLB 15 The Show", value: 25, date: "2015/06/18"},
+		{key: "MLB 15 The Show", value: 21, date: "2015/06/19"},
+		{key: "MLB 15 The Show", value: 675, date: "2015/06/20"},
+		{key: "MLB 15 The Show", value: 354, date: "2015/06/21"},
+		{key: "MLB 15 The Show", value: 221, date: "2015/06/22"},
+		{key: "MLB 15 The Show", value: 445, date: "2015/06/23"},
+		{key: "MLB 15 The Show", value: 345, date: "2015/06/24"},
+		{key: "MLB 15 The Show", value: 123, date: "2015/06/25"},
+		{key: "MLB 15 The Show", value: 145, date: "2015/06/26"},
+		{key: "MLB 15 The Show", value: 456, date: "2015/06/27"},
+		{key: "MLB 15 The Show", value: 234, date: "2015/06/28"},
+		{key: "MLB 15 The Show", value: 234, date: "2015/06/29"},
+		{key: "MLB 15 The Show", value: 198, date: "2015/06/30"},
+	];
+	
+	/** Create SVG Dimensions **/ 
+	var svg_height = 600;
+	var svg_width = 1000;
+	var margin = {
+		top: 50,
+		bottom: 100,
+		right: 40,
+		left: 100
+	};
+	var chart_width = svg_width - margin.left - margin.right; 
+	var chart_height = svg_height - margin.top - margin.bottom;
+	
+	/** Add SVG Area to Page **/ 
+	var svg = d3.select("#chart-area").append("svg")
+				.attr("id", "chart")
+				.attr("width", svg_width)
+				.attr("height", svg_height);
+				
+	var chart = svg.append("g")
+					.classed("display", true)
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	/** Format Date Object **/ 
+	var dateParser = d3.time.format("%Y/%m/%d").parse;
+	
+	/** Scale Data to SVG Area **/
+	var x = d3.time.scale()
+				.domain(d3.extent(Twitchdata, function(d) {
+					var date = dateParser(d.date);
+					return date;
+				}))
+				.range([0, chart_width]);
+	var y = d3.scale.linear()
+				.domain([0, d3.max(Twitchdata, function(d) {
+					return d.value;
+				})])
+				.range([chart_height, 0]);
+	
+	/** Create Axis Labels **/
+	var xAxis = d3.svg.axis()
+					.scale(x)
+					.orient("bottom")
+					.ticks(d3.time.days, 7)
+					.tickFormat(d3.time.format("%m/%d"));
+	var yAxis = d3.svg.axis()
+					.scale(y)
+					.orient("left")
+					.ticks(4);
+	
+	/** Draw Path Between Data Points **/
+	var line = d3.svg.line()
+					.x(function(d) {
+						var date = dateParser(d.date);
+						return x(date);
+					})
+					.y(function(d) {
+						return y(d.value);
+					})
+					.interpolate("monotone");
+	
+	/** Draw Shading Area Below Data Points **/
+	var area = d3.svg.area()
+					.x(function(d) {
+						var date = dateParser(d.date);
+						return x(date);
+					})
+					.y0(chart_height)
+					.y1(function(d) {
+						return y(d.value);
+					})
+					.interpolate("monotone");
+
+	/** Plot Data to SVG Area **/
+	function plot(params) {
+		/** Add Axis Lables to Chart **/
+		this.append("g")
+				.classed("x axis", true)
+				.attr("transform", "translate(0," + chart_height + ")")
+				.call(params.axis.x);
+		this.append("g")
+				.classed("y axis", true)
+				.attr("transform", "translate(0,0)")
+				.call(params.axis.y);
+		
+		/** Enter Phase - Bind Data to Chart **/
+		this.selectAll(".area")
+				.data([params.data])
+				.enter()
+					.append("path")
+					.classed("area", true);
+		this.selectAll(".trendline")
+				.data([params.data])
+				.enter()
+					.append("path")
+					.classed("trendline", true);
+		this.selectAll(".point")
+				.data(params.data)
+				.enter()
+					.append("circle")
+					.classed("point", true)
+					.attr("r", 2);
+		/** Update Phase **/
+		this.selectAll(".area")
+				.attr("d", function(d) {
+					return area(d);
+				})
+		this.selectAll(".trendline")
+				.attr("d", function(d) {
+					return line(d);
+				})
+		this.selectAll(".point")
+				.attr("cx", function(d) {
+					var date = dateParser(d.date);
+					return x(date);
+				})
+				.attr("cy", function(d) {
+					return y(d.value);
+				})
+		/** Exit Phase **/
+		this.selectAll(".area")
+				.data([params.data])
+				.exit()
+				.remove();
+		this.selectAll(".trendline")
+				.data([params.data])
+				.exit()
+				.remove();
+		this.selectAll(".point")
+				.data(params.data)
+				.exit()
+				.remove();
+	}
+	
+	plot.call(chart, {
+		data: Twitchdata,
+		axis: {
+			x: xAxis,
+			y: yAxis
+		}
+	});
+	
+</script>
+</body>
+</html>
